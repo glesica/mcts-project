@@ -1,0 +1,2 @@
+Implementation of the Monte Carlo Tree Search (MCTS) algorithm along with a
+simple game AI that plays Connect Four.
