@@ -3,6 +3,7 @@ A collection of classes and functions for playing certain types of
 games. Specifically, an implementation of the MCTS algorithm.
 """
 import random, Queue
+from math import sqrt, log
 
 
 class Game(object):
@@ -64,6 +65,10 @@ class ConnectFour(Game):
 
     def _streak(self, state, player, start, delta, length=0, target=None):
         # TODO: Clean up length/target, don't need both, just use self.target
+        # Check for out-of-bounds at low end b/c of wrapping
+        row, column = start
+        if row < 0 or column < 0:
+            return False
         # Set the default target length if we weren't given one
         if target is None:
             target = self.target
@@ -72,7 +77,6 @@ class ConnectFour(Game):
             return True
         # Streak has ended or run into edge, done, failure
         try:
-            row, column = start
             if state[column][row] != player:
                 return False
         except IndexError:
@@ -96,7 +100,7 @@ class ConnectFour(Game):
                 if len(column) > i:
                     output += str(column[i])
                 else:
-                    output += 'E'
+                    output += '-'
             if escape:
                 output += '\\n'
             else:
@@ -190,7 +194,8 @@ class Node(object):
         while active.qsize() > 0:
             next = active.get()
             for _, child in next.children.items():
-                active.put(child)
+                if child is not None:
+                    active.put(child)
             yield next
 
     def __len__(self):
@@ -202,6 +207,28 @@ class Node(object):
         for node in self.traverse():
             n += 1
         return n
+
+    @property
+    def weight(self):
+        """
+        The weight of the current node.
+        """
+        if self.visits == 0:
+            return 0
+        return self.value / float(self.visits)
+
+    def max_child(self):
+        """
+        Returns the child with the highest value.
+        """
+        maxc = None
+        maxwt = None
+        for child in self.children.values():
+            if maxwt is None or maxwt < child.weight:
+                maxc = child
+                maxwt = child.weight
+        return maxc
+
         
     def dot_string(self, value=False, prettify=lambda x: x):
         """
@@ -288,7 +315,7 @@ def minimax(game, state, player):
 
 def mcts(game, state, player, n):
     """
-    Implementation of the Monte Carlo Tree Search algorithm.
+    Implementation of the UCT variant of the Monte Carlo Tree Search algorithm.
     """
     root = Node(None, None, state, player)
     unexplored = Queue.Queue()
@@ -319,7 +346,7 @@ def mcts(game, state, player, n):
         # Back simulation value up to the root
         backup = current
         while backup is not None:
-            backup.value = (backup.value * backup.visits + simvalue) / (backup.visits + 1)
+            backup.value += simvalue
             backup.visits += 1
             backup = backup.parent
 
