@@ -1,7 +1,8 @@
+import sys
 import mcts
 
 def play(human=True, n=1000):
-# Testing ConnectFour - mcts()
+# Testing ConnectFour - mcts_uct()
     height = 6
     width = 7
     target = 4
@@ -27,21 +28,24 @@ def play(human=True, n=1000):
             # Got a valid action
             state = game.result(state, action, player)
         else:
-            result = mcts.mcts(game, state, player, n)
-            state = game.result(state, result.max_child().action, player)
+            action = mcts.mcts_uct(game, state, player, n)
+            state = game.result(state, action, player)
+
+        print 'Player 1 chose %s' % action
+        print game.pretty_state(state, False)
 
         # Intermediate win check
         if game.terminal(state):
             break
 
         # Computer plays now
-        result = mcts.mcts(game, state, computer, n)
-        state = game.result(state, result.max_child().action, computer)
+        action = mcts.mcts_uct(game, state, computer, n)
+        state = game.result(state, action, computer)
 
-    print game.terminal(state)
-    print game.outcome(state, player)
+        print 'Player 2 chose %s' % action
 
-    game.pretty_state(state)
+    print game.pretty_state(state, False)
+    print
     outcome = game.outcome(state, player)
     if outcome == 1:
         print 'Player 1 wins.'
@@ -49,8 +53,13 @@ def play(human=True, n=1000):
         print 'Player 2 wins.'
     else:
         print 'Tie game.'
+    
 
-    return result
+if len(sys.argv) > 1:
+    n = int(sys.argv[1])
+else:
+    n = 1000
 
-outcome = play(False)
+play(n=n)
+
 
