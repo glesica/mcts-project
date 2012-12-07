@@ -93,15 +93,23 @@ class ConnectFour(Game):
             target
         )
 
-    def pretty_state(self, state, escape=True):
+    def pretty_state(self, state, escape=False):
         output = ''
+        for j in range(self.width):
+            output += ' ' + str(j)
+        output += ' '
+        if escape:
+            output += '\\n'
+        else:
+            output += '\n'
         i = self.height - 1
         while i >= 0:
             for column in state:
                 if len(column) > i:
-                    output += str(column[i])
+                    output += '|' + str(column[i])
                 else:
-                    output += '-'
+                    output += '| '
+            output += '|'
             if escape:
                 output += '\\n'
             else:
