@@ -22,7 +22,7 @@ class TestMcts(unittest.TestCase):
         )
     def test_p1_north_west_diagonal_win(self):
         """
-        Regression test for the following situation were the player 1 win was 
+        Regression test for the following situation where the player 1 win was 
         undetected:
         
         0 1 2 3 4 5 6 
