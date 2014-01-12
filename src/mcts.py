@@ -6,8 +6,6 @@ import random, Queue
 from math import sqrt, log
 from random import sample
 
-from pprint import pprint
-
 class Game(object):
     """
     Base class for multi-player adversarial games.
