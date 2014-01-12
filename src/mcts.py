@@ -6,6 +6,7 @@ import random, Queue
 from math import sqrt, log
 from random import sample
 
+from pprint import pprint
 
 class Game(object):
     """
@@ -64,34 +65,30 @@ class ConnectFour(Game):
             raise Exception('Invalid action: out of range')
         return len(state[action]) < self.height
 
-    def _streak(self, state, player, start, delta, length=0, target=None):
-        # TODO: Clean up length/target, don't need both, just use self.target
+    def _streak(self, state, player, start, delta, length=0):
         # Check for out-of-bounds at low end b/c of wrapping
         row, column = start
         if row < 0 or column < 0:
             return False
-        # Set the default target length if we weren't given one
-        if target is None:
-            target = self.target
-        # Streak is already long enough, done, success
-        if length == target:
-            return True
-        # Streak has ended or run into edge, done, failure
         try:
-            if state[column][row] != player:
-                return False
+            piece = state[column][row]
         except IndexError:
             return False
-        # Continue searching, current slot is owned by the player
+        if piece != player:
+            return False
+        # Current slot is owned by the player
+        length += 1
+        if length == self.target: # Streak is already long enough
+            return True
+        # Continue searching, 
         drow, dcolumn = delta
         return self._streak(
             state,
             player,
             (row + drow, column + dcolumn),
             delta,
-            length + 1,
-            target
-        )
+            length
+        )        
 
     def pretty_state(self, state, escape=False):
         output = ''
